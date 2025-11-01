@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>Choose Property Type | RentEasy</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 40px 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    backdrop-filter: blur(12px);
+    animation: fadeIn 0.4s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+  }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 12px 0;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .option-btn:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+  }
+
+  .option-btn i {
+    margin-right: 8px;
+  }
+
+  footer {
+    margin-top: 25px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>What do you want to post?</h2>
+
+    <button class="option-btn" onclick="location.href='rent.html'">
+      🏠 House for Rent
+    </button>
+
+    <button class="option-btn" onclick="location.href='plot.html'">
+      🏡 Plot for Sale
+    </button>
+
+    <button class="option-btn" onclick="location.href='shop.html'">
+      🏪 Shop for Rent
+    </button>
+
+    <footer>© 2025 RentEasy</footer>
+  </div>
+
+</body>
+</html>

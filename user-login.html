@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>User Login | RentEasy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #1e3a8a, #0f172a);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    h2 { margin-bottom: 10px; }
+    p { color: #cbd5e1; font-size: 0.9rem; margin-bottom: 25px; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+    }
+    input::placeholder { color: #cbd5e1; }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover { background: linear-gradient(90deg, #2563eb, #1d4ed8); transform: scale(1.03); }
+    .toggle { margin-top: 12px; font-size: 0.9rem; color: #93c5fd; cursor: pointer; }
+    .message { margin-top: 10px; font-weight: 600; }
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2 id="formTitle">User Login</h2>
+    <p id="formSubtitle">Login to explore houses, plots & shops.</p>
+
+    <div id="loginForm">
+      <input type="number" id="loginPhone" placeholder="Mobile Number" required />
+      <input type="password" id="loginPassword" placeholder="Password" required />
+      <button onclick="login()">Login</button>
+      <p class="toggle" onclick="showSignup()">Don’t have an account? Sign up</p>
+    </div>
+
+    <div id="signupForm" style="display:none;">
+      <input type="text" id="signupName" placeholder="Full Name" required />
+      <input type="number" id="signupPhone" placeholder="Mobile Number" required />
+      <input type="password" id="signupPassword" placeholder="Password" required />
+      <button onclick="signup()">Sign Up</button>
+      <p class="toggle" onclick="showLogin()">Already have an account? Login</p>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    const API = "http://localhost:5000/api/user";
+
+    function showSignup() {
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("signupForm").style.display = "block";
+      document.getElementById("formTitle").textContent = "User Sign Up";
+      document.getElementById("formSubtitle").textContent = "Create your RentEasy account.";
+    }
+
+    function showLogin() {
+      document.getElementById("signupForm").style.display = "none";
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("formTitle").textContent = "User Login";
+      document.getElementById("formSubtitle").textContent = "Login to explore properties.";
+    }
+
+    async function signup() {
+      const name = document.getElementById("signupName").value.trim();
+      const phone = document.getElementById("signupPhone").value.trim();
+      const password = document.getElementById("signupPassword").value.trim();
+      const message = document.getElementById("message");
+      message.textContent = "";
+
+      if (!name || !phone || !password) {
+        message.textContent = "Please fill all fields.";
+        message.className = "message error";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          message.textContent = "✅ Signup successful! Redirecting...";
+          message.className = "message success";
+          localStorage.setItem("userPhone", phone);
+          localStorage.setItem("userName", name);
+          setTimeout(() => window.location.href = "user-select.html", 800);
+        } else {
+          message.textContent = "❌ " + (data.message || "Signup failed");
+          message.className = "message error";
+        }
+      } catch (err) {
+        console.error(err);
+        message.textContent = "Server error. Try again.";
+        message.className = "message error";
+      }
+    }
+
+    async function login() {
+      const phone = document.getElementById("loginPhone").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      const message = document.getElementById("message");
+      message.textContent = "";
+
+      if (!phone || !password) {
+        message.textContent = "Please enter both fields.";
+        message.className = "message error";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          message.textContent = "✅ Login successful! Redirecting...";
+          message.className = "message success";
+          localStorage.setItem("userPhone", phone);
+          localStorage.setItem("userName", data.user.name);
+          setTimeout(() => window.location.href = "user-select.html", 800);
+        } else {
+          message.textContent = "❌ " + (data.message || "Invalid credentials");
+          message.className = "message error";
+        }
+      } catch (err) {
+        console.error(err);
+        message.textContent = "Server error. Try again.";
+        message.className = "message error";
+      }
+    }
+  </script>
+</body>
+</html>

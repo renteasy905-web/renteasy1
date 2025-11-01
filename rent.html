@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Rent House | RentEasy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      padding: 25px 20px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 { text-align: center; margin-bottom: 15px; font-size: 1.6rem; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    input::placeholder, textarea::placeholder { color: #cbd5e1; }
+    input[type="file"] { background: #fff; color: #000; cursor: pointer; }
+    button {
+      width: 100%;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    button:hover { background: #2563eb; }
+    .message { text-align: center; margin-top: 10px; font-weight: 600; min-height: 22px; }
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+    .location-btn { background: #22c55e; margin-top: 5px; }
+    .location-btn:hover { background: #16a34a; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Upload House for Rent</h2>
+
+    <form id="rentForm" onsubmit="uploadHouse(event)">
+      <input type="text" id="ownerName" placeholder="Owner Name" required />
+      <input type="text" id="mobile" placeholder="Mobile Number" required />
+
+      <input type="text" id="location" placeholder="Fetching live location..." readonly required />
+      <button type="button" class="location-btn" onclick="getLiveLocation()">📍 Get Live Location</button>
+
+      <select id="floor" required>
+        <option value="">Select Floor</option>
+        <option value="Ground Floor">Ground Floor</option>
+        <option value="1st Floor">1st Floor</option>
+        <option value="2nd Floor">2nd Floor</option>
+        <option value="3rd Floor or Above">3rd Floor or Above</option>
+      </select>
+
+      <select id="kitchen" required>
+        <option value="">Kitchen</option>
+        <option value="Available">Available</option>
+        <option value="Not Available">Not Available</option>
+      </select>
+
+      <select id="bedroom" required>
+        <option value="">Bedroom</option>
+        <option value="1 BHK">1 BHK</option>
+        <option value="2 BHK">2 BHK</option>
+        <option value="3 BHK">3 BHK</option>
+        <option value="Studio">Studio</option>
+      </select>
+
+      <select id="hall" required>
+        <option value="">Hall</option>
+        <option value="Available">Available</option>
+        <option value="Not Available">Not Available</option>
+      </select>
+
+      <select id="garden" required>
+        <option value="">Garden</option>
+        <option value="Available">Available</option>
+        <option value="Not Available">Not Available</option>
+      </select>
+
+      <select id="waterSupply" required>
+        <option value="">Water Supply</option>
+        <option value="24 Hours">24 Hours</option>
+        <option value="Limited">Limited</option>
+        <option value="No Water Supply">No Water Supply</option>
+      </select>
+
+      <input type="number" id="rent" placeholder="Monthly Rent (₹)" required />
+      <textarea id="description" placeholder="Add any other details..." required></textarea>
+
+      <label for="photo">📷 Upload House Photos:</label>
+      <!-- ✅ allow multiple images -->
+      <input type="file" id="photo" accept="image/*" multiple required />
+
+      <button type="submit">Submit House</button>
+    </form>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    // 📍 Get Live Location
+    function getLiveLocation() {
+      const locationInput = document.getElementById("location");
+      locationInput.value = "Fetching location...";
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            locationInput.value = `Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)}`;
+          },
+          () => {
+            locationInput.value = "";
+            alert("⚠️ Location access denied. Please enable GPS.");
+          }
+        );
+      } else {
+        alert("❌ Geolocation not supported.");
+      }
+    }
+
+    // 🚀 Submit House Data
+    async function uploadHouse(event) {
+      event.preventDefault();
+      const msg = document.getElementById("message");
+      msg.textContent = "";
+      msg.className = "message";
+
+      const data = {
+        ownerName: document.getElementById("ownerName").value.trim(),
+        mobile: document.getElementById("mobile").value.trim(),
+        location: document.getElementById("location").value.trim(),
+        floor: document.getElementById("floor").value,
+        kitchen: document.getElementById("kitchen").value,
+        bedroom: document.getElementById("bedroom").value,
+        hall: document.getElementById("hall").value,
+        garden: document.getElementById("garden").value,
+        waterSupply: document.getElementById("waterSupply").value,
+        rent: document.getElementById("rent").value.trim(),
+        description: document.getElementById("description").value.trim(),
+      };
+      const photos = document.getElementById("photo").files;
+
+      if (!photos.length) {
+        msg.textContent = "⚠️ Please select at least one photo.";
+        msg.classList.add("error");
+        return;
+      }
+
+      const formData = new FormData();
+      for (const key in data) formData.append(key, data[key]);
+      formData.append("type", "house");
+
+      // ✅ Append multiple photos
+      for (let i = 0; i < photos.length; i++) {
+        formData.append("photos", photos[i]);
+      }
+
+      try {
+        const res = await fetch("http://localhost:5000/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await res.json();
+        if (result.success) {
+          msg.textContent = "✅ House uploaded successfully!";
+          msg.classList.add("success");
+          document.getElementById("rentForm").reset();
+        } else {
+          msg.textContent = "❌ Upload failed.";
+          msg.classList.add("error");
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        msg.textContent = "⚠️ Server issue.";
+        msg.classList.add("error");
+      }
+    }
+
+    window.onload = () => getLiveLocation();
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RentEasy | Home Rentals Made Simple</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  body {
+    background: linear-gradient(to right, #0f172a, #1e3a8a);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    margin-bottom: 30px;
+  }
+
+  .role-buttons {
+    display: flex;
+    gap: 20px;
+  }
+
+  button {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+  }
+
+  footer {
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.9rem;
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+
+  <h1> RentEasy</h1>
+  <p>Find or list your perfect home — securely and easily.</p>
+
+  <div class="role-buttons">
+    <button onclick="location.href='owner-login.html'">I’m an Owner</button>
+    <button onclick="location.href='User-login.html'">I’m a Tenant/Buyer</button>
+  </div>
+
+  <footer>© 2025 RentEasy. All rights reserved.</footer>
+
+</body>
+</html>

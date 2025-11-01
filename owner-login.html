@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Owner Login | RentEasy</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * {margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+  body {
+    background: linear-gradient(135deg,#1e3a8a,#0f172a);
+    color:#fff;display:flex;justify-content:center;align-items:center;
+    height:100vh;overflow:hidden;
+  }
+  .container {
+    width:90%;max-width:360px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(15px);
+    padding:35px 25px;border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 20px rgba(0,0,0,0.3);
+    animation:fadeIn 0.5s ease;
+  }
+  @keyframes fadeIn {from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  h2{font-size:1.7rem;margin-bottom:10px;}
+  p{color:#cbd5e1;margin-bottom:20px;font-size:0.9rem;}
+  input {
+    width:100%;padding:12px;margin:10px 0;
+    border:none;border-radius:12px;outline:none;
+    font-size:1rem;background:rgba(255,255,255,0.2);color:#fff;
+  }
+  input::placeholder{color:#d1d5db;}
+  .btn {
+    width:100%;background:#3b82f6;border:none;padding:12px;
+    border-radius:12px;color:#fff;font-size:1rem;cursor:pointer;
+    transition:all 0.3s;margin-top:10px;
+  }
+  .btn:hover{background:#2563eb;transform:scale(1.02);}
+  .switch{margin-top:15px;font-size:0.85rem;}
+  .switch a{color:#60a5fa;text-decoration:none;}
+  .switch a:hover{text-decoration:underline;}
+  .back-btn{position:absolute;top:20px;left:20px;color:#fff;text-decoration:none;font-size:0.9rem;
+    background:rgba(255,255,255,0.1);padding:6px 12px;border-radius:10px;}
+  .back-btn:active{background:rgba(255,255,255,0.25);}
+</style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <!-- LOGIN SCREEN -->
+  <div class="container" id="loginBox">
+    <h2>Owner Login</h2>
+    <p>Welcome back! Sign in to manage your rentals.</p>
+    <input type="tel" placeholder="Phone Number" id="loginPhone" pattern="[0-9]{10}" required>
+    <input type="password" placeholder="Password" id="loginPassword">
+    <button class="btn" onclick="login()">Login</button>
+
+    <div class="switch">
+      Don’t have an account? <a href="#" onclick="toggleForm()">Sign up</a>
+    </div>
+  </div>
+
+  <!-- SIGNUP SCREEN -->
+  <div class="container" id="signupBox" style="display:none;">
+    <h2>Owner Sign Up</h2>
+    <p>Create your account to post your properties.</p>
+    <input type="text" placeholder="Full Name" id="signupName">
+    <input type="tel" placeholder="Phone Number" id="signupPhone" pattern="[0-9]{10}" required>
+    <input type="password" placeholder="Password" id="signupPassword">
+    <button class="btn" onclick="signup()">Sign Up</button>
+
+    <div class="switch">
+      Already have an account? <a href="#" onclick="toggleForm()">Login</a>
+    </div>
+  </div>
+
+<script>
+function toggleForm() {
+  const loginBox = document.getElementById('loginBox');
+  const signupBox = document.getElementById('signupBox');
+  const isLoginVisible = loginBox.style.display !== 'none';
+  loginBox.style.display = isLoginVisible ? 'none' : 'block';
+  signupBox.style.display = isLoginVisible ? 'block' : 'none';
+}
+
+// ✅ Login API
+async function login() {
+  const phone = document.getElementById('loginPhone').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  if (!phone || !password) {
+    alert("Please enter both phone number and password");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/owner/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, password }),
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    localStorage.setItem("owner", JSON.stringify(data.owner));
+    window.location.href = "owner-select.html";
+  } catch (err) {
+    console.error("Login Error:", err);
+    alert("Server error, please try again");
+  }
+}
+
+// ✅ Signup API
+async function signup() {
+  const name = document.getElementById('signupName').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const password = document.getElementById('signupPassword').value.trim();
+
+  if (!name || !phone || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/owner/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, phone, password }),
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || "Signup failed");
+      return;
+    }
+
+    alert("Signup successful! Please log in.");
+    toggleForm();
+  } catch (err) {
+    console.error("Signup Error:", err);
+    alert("Server error, please try again");
+  }
+}
+</script>
+
+</body>
+</html>

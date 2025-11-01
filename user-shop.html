@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Available Shops | RentEasy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+    }
+
+    header {
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      font-size: 22px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .property-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 25px;
+      padding: 25px;
+    }
+
+    .property-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .property-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .image-slider {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .image-slider img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: none;
+      border-bottom: 2px solid #222;
+    }
+
+    .image-slider img.active {
+      display: block;
+    }
+
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: #fff;
+      padding: 8px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .slider-btn.left { left: 10px; }
+    .slider-btn.right { right: 10px; }
+
+    .property-details {
+      padding: 15px 18px;
+    }
+
+    .property-details h3 {
+      margin: 0;
+      font-size: 20px;
+      color: #ffb400;
+      text-transform: capitalize;
+    }
+
+    .property-details p {
+      margin: 8px 0;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #ddd;
+    }
+
+    .action-btn {
+      width: 100%;
+      border: none;
+      padding: 10px 0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .location-btn {
+      background: #22c55e;
+      color: #fff;
+    }
+    .location-btn:hover { background: #16a34a; }
+
+    .call-btn {
+      background: #ffb400;
+      color: #000;
+      border-radius: 0 0 20px 20px;
+    }
+    .call-btn:hover { background: #ffd65c; }
+
+    footer {
+      text-align: center;
+      padding: 12px;
+      background: #111;
+      font-size: 14px;
+      color: #bbb;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    🏪 Available Shops
+  </header>
+
+  <div class="property-container" id="propertyContainer">
+    <p style="text-align:center;width:100%">Loading shops...</p>
+  </div>
+
+  <footer>
+    © 2025 RentEasy | All Rights Reserved
+  </footer>
+
+  <script>
+    async function loadShops() {
+      const container = document.getElementById("propertyContainer");
+      container.innerHTML = "<p style='text-align:center;width:100%'>Loading...</p>";
+
+      try {
+        const response = await fetch("http://localhost:5000/api/shops");
+        const data = await response.json();
+
+        if (!data.success || data.shops.length === 0) {
+          container.innerHTML = "<p style='text-align:center;width:100%'>No shops found.</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+        data.shops.forEach((shop) => {
+          const card = document.createElement("div");
+          card.classList.add("property-card");
+
+          const slider = document.createElement("div");
+          slider.classList.add("image-slider");
+          (shop.imageUrl || []).forEach((url, i) => {
+            const img = document.createElement("img");
+            img.src = url;
+            if (i === 0) img.classList.add("active");
+            slider.appendChild(img);
+          });
+
+          if (shop.imageUrl && shop.imageUrl.length > 1) {
+            const leftBtn = document.createElement("button");
+            leftBtn.classList.add("slider-btn", "left");
+            leftBtn.innerHTML = "<i class='fa fa-chevron-left'></i>";
+
+            const rightBtn = document.createElement("button");
+            rightBtn.classList.add("slider-btn", "right");
+            rightBtn.innerHTML = "<i class='fa fa-chevron-right'></i>";
+
+            slider.appendChild(leftBtn);
+            slider.appendChild(rightBtn);
+
+            let currentIndex = 0;
+            const imgs = slider.querySelectorAll("img");
+
+            leftBtn.onclick = () => {
+              imgs[currentIndex].classList.remove("active");
+              currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
+              imgs[currentIndex].classList.add("active");
+            };
+
+            rightBtn.onclick = () => {
+              imgs[currentIndex].classList.remove("active");
+              currentIndex = (currentIndex + 1) % imgs.length;
+              imgs[currentIndex].classList.add("active");
+            };
+          }
+
+          const details = document.createElement("div");
+          details.classList.add("property-details");
+          details.innerHTML = `
+            <h3>${shop.ownerName || "Unknown Owner"}</h3>
+            <p><strong>Type:</strong> ${shop.type}</p>
+            <p><strong>Rent:</strong> ₹${shop.rent || 0}</p>
+            <p><strong>Location:</strong> ${shop.location || "N/A"}</p>
+            <p><strong>Description:</strong> ${shop.description || "No description"}</p>
+          `;
+
+          const locationBtn = document.createElement("button");
+          locationBtn.classList.add("action-btn", "location-btn");
+          locationBtn.innerHTML = `<i class="fa fa-map-marker-alt"></i> View Location`;
+          locationBtn.onclick = () => {
+            const match = (shop.location || "").match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/);
+            if (match) {
+              const [_, lat, lng] = match;
+              window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+            } else {
+              alert("Location data not available");
+            }
+          };
+
+          const callBtn = document.createElement("button");
+          callBtn.classList.add("action-btn", "call-btn");
+          callBtn.innerHTML = `<i class="fa fa-phone"></i> Call Owner`;
+          callBtn.onclick = () => {
+            if (shop.mobile) {
+              window.location.href = `tel:${shop.mobile}`;
+            } else {
+              alert("Owner contact not available");
+            }
+          };
+
+          card.appendChild(slider);
+          card.appendChild(details);
+          card.appendChild(locationBtn);
+          card.appendChild(callBtn);
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Fetch error:", error);
+        container.innerHTML = "<p style='text-align:center;width:100%'>Failed to load shops.</p>";
+      }
+    }
+
+    loadShops();
+  </script>
+</body>
+</html>
