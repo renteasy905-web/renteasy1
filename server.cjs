@@ -5,17 +5,20 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const { v2: cloudinary } = require("cloudinary");
 const fs = require("fs");
+const path = require("path");
 const User = require("./models/user.cjs"); // ✅ User model
 
-// ✅ Load environment variables
 dotenv.config();
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // ✅ Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ✅ Serve static frontend directly from root folder
+app.use(express.static(__dirname));
 
 // ✅ Cloudinary Config
 const cloudinaryUrl = new URL(process.env.CLOUDINARY_URL);
@@ -42,7 +45,7 @@ const Owner = mongoose.model("Owner", ownerSchema);
    🏠 PROPERTY MODEL (Supports multiple images)
 ======================================================== */
 const propertySchema = new mongoose.Schema({
-  type: { type: String, required: true }, // house | plot | shop
+  type: { type: String, required: true },
   ownerName: String,
   mobile: String,
   location: String,
@@ -55,8 +58,8 @@ const propertySchema = new mongoose.Schema({
   price: Number,
   rent: Number,
   description: String,
-  imageUrl: [String], // ✅ multiple images
-  mapLink: String, // ✅ auto-generated Google Maps link
+  imageUrl: [String],
+  mapLink: String,
   date: { type: Date, default: Date.now },
 });
 const Property = mongoose.model("Property", propertySchema);
@@ -66,8 +69,6 @@ const upload = multer({ dest: "uploads/" });
 /* ========================================================
    👤 OWNER AUTH
 ======================================================== */
-
-// ✅ Owner Signup
 app.post("/api/owner/signup", async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -87,7 +88,6 @@ app.post("/api/owner/signup", async (req, res) => {
   }
 });
 
-// ✅ Owner Login
 app.post("/api/owner/login", async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -106,8 +106,6 @@ app.post("/api/owner/login", async (req, res) => {
 /* ========================================================
    👥 USER AUTH
 ======================================================== */
-
-// ✅ User Signup
 app.post("/api/user/signup", async (req, res) => {
   try {
     const { name, phone, password } = req.body;
@@ -127,7 +125,6 @@ app.post("/api/user/signup", async (req, res) => {
   }
 });
 
-// ✅ User Login
 app.post("/api/user/login", async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -146,8 +143,6 @@ app.post("/api/user/login", async (req, res) => {
 /* ========================================================
    🏡 PROPERTY UPLOAD / FETCH / DELETE
 ======================================================== */
-
-// ✅ Upload multiple property images
 app.post("/api/upload", upload.array("photos", 5), async (req, res) => {
   try {
     const {
@@ -172,15 +167,12 @@ app.post("/api/upload", upload.array("photos", 5), async (req, res) => {
       return res.status(400).json({ success: false, message: "No images uploaded" });
 
     const imageUrls = [];
-
-    // ✅ Upload all images to Cloudinary
     for (const file of req.files) {
       const uploadResult = await cloudinary.uploader.upload(file.path, { folder: "renteasy" });
       fs.unlinkSync(file.path);
       imageUrls.push(uploadResult.secure_url);
     }
 
-    // ✅ Generate Google Maps Link
     let mapLink = "";
     const match = location.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/);
     if (match) {
@@ -188,7 +180,6 @@ app.post("/api/upload", upload.array("photos", 5), async (req, res) => {
       mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
     }
 
-    // ✅ Save property in MongoDB
     const newProperty = new Property({
       type,
       ownerName,
@@ -208,8 +199,6 @@ app.post("/api/upload", upload.array("photos", 5), async (req, res) => {
     });
 
     await newProperty.save();
-    console.log("✅ Property saved:", newProperty);
-
     res.json({ success: true, message: "✅ Property uploaded successfully!", property: newProperty });
   } catch (err) {
     console.error("Upload Error:", err);
@@ -217,7 +206,6 @@ app.post("/api/upload", upload.array("photos", 5), async (req, res) => {
   }
 });
 
-// ✅ Fetch only houses for user-house.html
 app.get("/api/houses", async (req, res) => {
   try {
     const houses = await Property.find({ type: "house" }).sort({ date: -1 });
@@ -228,7 +216,6 @@ app.get("/api/houses", async (req, res) => {
   }
 });
 
-// ✅ Delete property
 app.delete("/api/property/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -244,6 +231,13 @@ app.delete("/api/property/:id", async (req, res) => {
 });
 
 /* ========================================================
-   🚀 SERVER START
+   🌐 SERVE FRONTEND FILES (directly from root)
+======================================================== */
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+/* ========================================================
+   🚀 START SERVER
 ======================================================== */
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
