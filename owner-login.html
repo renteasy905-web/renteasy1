@@ -95,7 +95,7 @@ async function login() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/owner/login", {
+    const res = await fetch("http://renteasy1.onrender.com/api/owner/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone, password }),
@@ -128,7 +128,7 @@ async function signup() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/owner/signup", {
+    const res = await fetch("http://renteasy1.onrender.com/api/owner/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, phone, password }),

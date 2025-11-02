@@ -1,265 +1,585 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Available Houses | RentEasy</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
   <style>
-    body {
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      background: #0b0b0b;
-      color: #fff;
+    :root{
+      --bg:#07070a;
+      --card:#0f1724;
+      --muted:#a8b3c2;
+      --accent:#ffb400;
+      --green:#22c55e;
+      --glass: rgba(255,255,255,0.04);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Poppins",sans-serif;
+      -webkit-font-smoothing:antialiased;
+      background:linear-gradient(180deg,#071226,var(--bg));
+      color:#fff;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
     }
 
-    header {
-      background: #111;
-      color: #fff;
-      text-align: center;
-      padding: 15px;
-      font-size: 22px;
-      font-weight: 600;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+    /* Top nav */
+    header.navbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      position:sticky;
+      top:0;
+      z-index:30;
+      background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(6px);
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      font-weight:700;color:var(--accent);
+      font-size:18px;
+    }
+    .nav-links{display:flex;gap:10px;align-items:center;}
+    .nav-links a{
+      color:#dbe8ff;text-decoration:none;padding:8px 12px;border-radius:10px;
+      font-weight:600;font-size:14px;
+    }
+    .nav-links a.active{background:rgba(255,255,255,0.02);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+    .nav-links a:hover{transform:translateY(-1px)}
+
+    /* Search / filter area */
+    .filters {
+      padding:16px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      background:transparent;
+    }
+    .filter-input{
+      background:var(--card);
+      border-radius:12px;
+      padding:10px;
+      border:1px solid rgba(255,255,255,0.03);
+      min-width: 160px;
+      color:#fff;
+    }
+    .filter-input input, .filter-input select {
+      background:transparent;border:0;color:#fff;outline:none;font-size:14px;
+      width:100%;
+    }
+    .filter-row { display:flex; gap:10px; width:100%; flex-wrap:wrap; }
+    .btn {
+      background: linear-gradient(90deg,var(--accent), #ffd36b);
+      color:#000;border:0;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;
+    }
+    .btn.ghost { background:transparent;border:1px solid rgba(255,255,255,0.06); color:#cfe3ff; }
+
+    /* grid */
+    .wrap { padding:12px; flex:1; }
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fill,minmax(320px,1fr));
+      gap:18px;
+      align-items:start;
     }
 
-    .property-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-      gap: 25px;
-      padding: 25px;
+    /* card */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      transition: transform .22s ease, box-shadow .22s ease;
+      border: 1px solid rgba(255,255,255,0.03);
+      display:flex;
+      flex-direction:column;
+    }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(2,6,23,0.65); }
+
+    /* image slider area */
+    .slider {
+      position:relative;
+      height:220px;
+      background:#000;
+    }
+    .slider img {
+      width:100%;
+      height:220px;
+      object-fit:cover;
+      display:none;
+    }
+    .slider img.active { display:block; }
+
+    .slider .nav {
+      position:absolute; top:50%; transform:translateY(-50%); width:100%;
+      display:flex; justify-content:space-between; pointer-events:none;
+    }
+    .slider button {
+      pointer-events:auto;
+      background:rgba(0,0,0,0.35); border:0; color:#fff; padding:10px; border-radius:50%;
+      margin:0 10px; cursor:pointer;
     }
 
-    .property-card {
-      background: #1a1a1a;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-      transition: all 0.3s ease;
+    .card-body{ padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+
+    .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .title { font-size:16px; font-weight:700; color:var(--accent); text-transform:capitalize; }
+    .sub { color:var(--muted); font-size:13px }
+
+    .info-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+    .pill{ background:var(--glass); border-radius:10px; padding:6px 8px; font-size:13px; color:#dbe8ff; }
+
+    .desc { color:#cbd6e6; font-size:13px; margin-top:8px; min-height:40px; }
+
+    .card-footer{
+      display:flex; gap:8px; padding:12px; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.03);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
     }
 
-    .property-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-    }
+    .left-actions { display:flex; gap:8px; align-items:center; }
+    .price { font-weight:800; color:var(--accent); font-size:16px; }
 
-    .image-slider {
-      position: relative;
-      width: 100%;
-      height: 220px;
-      overflow: hidden;
-    }
+    .action-buttons { display:flex; gap:8px; }
+    .call, .wa { padding:10px 12px; border-radius:10px; border:0; cursor:pointer; font-weight:700; }
+    .call { background: #000000; color: var(--accent); border:1px solid rgba(255,180,0,0.12); }
+    .wa { background: var(--green); color:#000; }
 
-    .image-slider img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      display: none;
-      border-bottom: 2px solid #222;
-    }
+    .rating { display:flex; gap:6px; align-items:center; }
 
-    .image-slider img.active {
-      display: block;
+    /* detail modal (full-screen) */
+    .modal {
+      position:fixed; inset:0; display:none; justify-content:center; align-items:center;
+      background:rgba(0,0,0,0.6); z-index:60; padding:18px;
     }
+    .modal.show { display:flex; }
+    .modal-card { width:100%; max-width:760px; border-radius:14px; overflow:auto; background: #071228; padding:0; }
 
-    .slider-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.5);
-      border: none;
-      color: #fff;
-      padding: 8px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
+    .modal-body { display:flex; gap:12px; padding:14px; flex-direction:column; color:#fff; }
+    .modal-grid { display:grid; grid-template-columns: 1fr; gap:12px; }
+    @media(min-width:900px){ .modal-grid { grid-template-columns: 1fr 1fr; } }
 
-    .slider-btn.left {
-      left: 10px;
-    }
+    .close-btn { position:absolute; right:18px; top:18px; background:transparent;border:0;color:#fff;font-size:22px; cursor:pointer; }
 
-    .slider-btn.right {
-      right: 10px;
-    }
+    /* empty / loading */
+    .placeholder { text-align:center; color:var(--muted); padding:40px; }
 
-    .property-details {
-      padding: 15px 18px;
-    }
-
-    .property-details h3 {
-      margin: 0;
-      font-size: 20px;
-      color: #ffb400;
-      text-transform: capitalize;
-    }
-
-    .property-details p {
-      margin: 8px 0;
-      font-size: 15px;
-      line-height: 1.5;
-      color: #ddd;
-    }
-
-    .action-btn {
-      width: 100%;
-      border: none;
-      padding: 10px 0;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .location-btn {
-      background: #22c55e;
-      color: #fff;
-    }
-    .location-btn:hover { background: #16a34a; }
-
-    .call-btn {
-      background: #ffb400;
-      color: #000;
-      border-radius: 0 0 20px 20px;
-    }
-    .call-btn:hover { background: #ffd65c; }
-
-    footer {
-      text-align: center;
-      padding: 12px;
-      background: #111;
-      font-size: 14px;
-      color: #bbb;
-      margin-top: 25px;
+    /* mobile tweaks */
+    @media(max-width:480px){
+      .filters { padding:10px 12px; gap:8px; }
+      .slider{ height:180px } .slider img{ height:180px }
     }
   </style>
 </head>
 <body>
-  <header>
-    🏠 Available Houses
+
+  <!-- NAV -->
+  <header class="navbar">
+    <div class="brand">
+      <i class="fa fa-house"></i> RentEasy
+    </div>
+    <nav class="nav-links" role="navigation" aria-label="main nav">
+      <a href="index.html">Home</a>
+      <a href="user-house.html" class="active">Houses</a>
+      <a href="profile.html">Profile</a>
+    </nav>
   </header>
 
-  <div class="property-container" id="propertyContainer">
-    <p style="text-align:center;width:100%">Loading houses...</p>
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-row" style="width:100%;align-items:center">
+      <div class="filter-input" style="flex:1; min-width:200px">
+        <input id="searchLocation" type="search" placeholder="Search by location (city/lat)"/>
+      </div>
+
+      <div class="filter-input" style="width:140px">
+        <select id="filterBedroom">
+          <option value="">Any bedroom</option>
+          <option>1 BHK</option>
+          <option>2 BHK</option>
+          <option>3 BHK</option>
+          <option>Studio</option>
+        </select>
+      </div>
+
+      <div class="filter-input" style="width:100px">
+        <input id="minRent" type="number" min="0" placeholder="Min ₹"/>
+      </div>
+      <div class="filter-input" style="width:100px">
+        <input id="maxRent" type="number" min="0" placeholder="Max ₹"/>
+      </div>
+
+      <button class="btn" id="applyFilters">Apply</button>
+      <button class="btn ghost" id="clearFilters">Clear</button>
+    </div>
   </div>
 
-  <footer>
-    © 2025 RentEasy | All Rights Reserved
+  <!-- Content -->
+  <main class="wrap">
+    <div id="grid" class="grid">
+      <div class="placeholder">Loading houses...</div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer style="text-align:center;padding:12px;color:#bfcfe6;background:transparent">
+    © 2025 RentEasy
   </footer>
 
-  <script>
-    async function loadHouses() {
-      const container = document.getElementById("propertyContainer");
-      container.innerHTML = "<p style='text-align:center;width:100%'>Loading...</p>";
+  <!-- Detail modal -->
+  <div id="modal" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close-btn" id="modalClose"><i class="fa fa-times"></i></button>
+      <div class="modal-body">
+        <div id="modalSlider" style="width:100%;height:320px;background:#000"></div>
+        <div class="modal-grid">
+          <div>
+            <h2 id="mTitle" style="margin:0;color:var(--accent)"></h2>
+            <p id="mLocation" class="sub"></p>
+            <p id="mPrice" style="font-weight:800;color:var(--accent);margin-top:6px"></p>
+            <div id="mPills" class="info-row"></div>
+            <p id="mDesc" class="desc"></p>
+          </div>
+          <div>
+            <p><strong>Owner:</strong> <span id="mOwner"></span></p>
+            <p><strong>Contact:</strong> <span id="mContact"></span></p>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button id="mCall" class="call">Call</button>
+              <button id="mWa" class="wa">WhatsApp</button>
+              <button id="mMap" class="btn ghost">Open in Maps</button>
+            </div>
+            <div style="margin-top:18px;">
+              <div style="font-size:13px;color:var(--muted);">Rate this listing</div>
+              <div id="mRating" style="margin-top:6px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      try {
-        const response = await fetch("http://localhost:5000/api/houses");
-        const data = await response.json();
+<script>
+/* =========================
+   Configuration: attempt
+   Render first then fallback
+   ========================= */
+const RENDER_URL = "https://renteasy1.onrender.com";
+const LOCAL_URL = "http://localhost:5000";
+const HOUSES_PATH = "/api/houses";
 
-        if (!data.success || data.houses.length === 0) {
-          container.innerHTML = "<p style='text-align:center;width:100%'>No houses found.</p>";
-          return;
-        }
+async function detectApiBase() {
+  // try render first (fast timeout)
+  const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms));
+  try {
+    const res = await Promise.race([fetch(RENDER_URL + HOUSES_PATH), timeout(3000)]);
+    if (res && res.ok) return RENDER_URL;
+  } catch(e){}
+  // fallback to localhost
+  try {
+    const res2 = await Promise.race([fetch(LOCAL_URL + HOUSES_PATH), timeout(3000)]);
+    if (res2 && res2.ok) return LOCAL_URL;
+  } catch(e){}
+  // final fallback to Render (even if failed) to show user-friendly message
+  return RENDER_URL;
+}
 
-        container.innerHTML = "";
-        data.houses.forEach((house) => {
-          const card = document.createElement("div");
-          card.classList.add("property-card");
+/* =========================
+   Utilities
+   ========================= */
+function createEl(tag, attrs={}, html=""){
+  const el = document.createElement(tag);
+  for(const k in attrs){
+    if(k === "class") el.className = attrs[k];
+    else if(k === "onclick") el.onclick = attrs[k];
+    else el.setAttribute(k, attrs[k]);
+  }
+  if(html) el.innerHTML = html;
+  return el;
+}
 
-          // 🖼️ Image Slider Section
-          const slider = document.createElement("div");
-          slider.classList.add("image-slider");
-          (house.imageUrl || []).forEach((url, i) => {
-            const img = document.createElement("img");
-            img.src = url;
-            if (i === 0) img.classList.add("active");
-            slider.appendChild(img);
-          });
+function formatRent(r){ return r ? `₹${Number(r).toLocaleString()}` : "₹0"; }
 
-          // Add navigation buttons for multiple images
-          if (house.imageUrl && house.imageUrl.length > 1) {
-            const leftBtn = document.createElement("button");
-            leftBtn.classList.add("slider-btn", "left");
-            leftBtn.innerHTML = "<i class='fa fa-chevron-left'></i>";
+/* =========================
+   Rendering functions
+   ========================= */
+function makeCard(house){
+  const card = createEl("article",{class:"card"});
 
-            const rightBtn = document.createElement("button");
-            rightBtn.classList.add("slider-btn", "right");
-            rightBtn.innerHTML = "<i class='fa fa-chevron-right'></i>";
+  // slider
+  const slider = createEl("div",{class:"slider"});
+  (house.imageUrl || []).forEach((u,i)=>{
+    const img = createEl("img", { src: u, alt: `image ${i+1}` });
+    if(i===0) img.classList.add("active");
+    slider.appendChild(img);
+  });
 
-            slider.appendChild(leftBtn);
-            slider.appendChild(rightBtn);
+  // nav if multiple
+  if((house.imageUrl || []).length > 1){
+    const nav = createEl("div",{class:"nav"});
+    const left = createEl("button",{}, '<i class="fa fa-chevron-left"></i>');
+    const right = createEl("button",{}, '<i class="fa fa-chevron-right"></i>');
+    left.onclick = () => slide(slider, -1);
+    right.onclick = () => slide(slider, +1);
+    nav.appendChild(left); nav.appendChild(right);
+    slider.appendChild(nav);
+  }
+  card.appendChild(slider);
 
-            let currentIndex = 0;
-            const imgs = slider.querySelectorAll("img");
+  // details block
+  const body = createEl("div",{class:"card-body"});
+  const meta = createEl("div",{class:"meta"});
+  meta.innerHTML = `<div class="title">${house.ownerName || "Owner"}</div><div class="sub">${house.type || ""}</div>`;
+  body.appendChild(meta);
 
-            leftBtn.onclick = () => {
-              imgs[currentIndex].classList.remove("active");
-              currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
-              imgs[currentIndex].classList.add("active");
-            };
+  const info = createEl("div",{class:"info-row"});
+  info.innerHTML = `
+    <span class="pill">${house.bedroom || "N/A"}</span>
+    <span class="pill">${house.floor || "N/A"}</span>
+    <span class="pill">${house.waterSupply || "N/A"}</span>
+  `;
+  body.appendChild(info);
 
-            rightBtn.onclick = () => {
-              imgs[currentIndex].classList.remove("active");
-              currentIndex = (currentIndex + 1) % imgs.length;
-              imgs[currentIndex].classList.add("active");
-            };
-          }
+  const desc = createEl("p",{class:"desc"}, (house.description || ""));
+  body.appendChild(desc);
 
-          // 🏘️ Property Details
-          const details = document.createElement("div");
-          details.classList.add("property-details");
-          details.innerHTML = `
-            <h3>${house.ownerName || "Unknown Owner"}</h3>
-            <p><strong>Type:</strong> ${house.type}</p>
-            <p><strong>Floor:</strong> ${house.floor || "N/A"}</p>
-            <p><strong>Bedroom:</strong> ${house.bedroom || "N/A"}</p>
-            <p><strong>Rent:</strong> ₹${house.rent || 0}</p>
-            <p><strong>Water Supply:</strong> ${house.waterSupply || "N/A"}</p>
-            <p><strong>Location:</strong> ${house.location || "N/A"}</p>
-            <p><strong>Description:</strong> ${house.description || "No description"}</p>
-          `;
+  // footer actions
+  const footer = createEl("div",{class:"card-footer"});
+  const leftActions = createEl("div",{class:"left-actions"});
+  const price = createEl("div",{class:"price"}, formatRent(house.rent) + (house.rent?" /mo":""));
+  leftActions.appendChild(price);
 
-          // 📍 View Location Button
-          const locationBtn = document.createElement("button");
-          locationBtn.classList.add("action-btn", "location-btn");
-          locationBtn.innerHTML = `<i class="fa fa-map-marker-alt"></i> View Location`;
-          locationBtn.onclick = () => {
-            const match = (house.location || "").match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/);
-            if (match) {
-              const [_, lat, lng] = match;
-              window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
-            } else {
-              alert("Location data not available");
-            }
-          };
+  const rating = createRating(house._id); // local UI rating
+  leftActions.appendChild(rating);
 
-          // 📞 Call Owner Button
-          const callBtn = document.createElement("button");
-          callBtn.classList.add("action-btn", "call-btn");
-          callBtn.innerHTML = `<i class="fa fa-phone"></i> Call Owner`;
-          callBtn.onclick = () => {
-            if (house.mobile) {
-              window.location.href = `tel:${house.mobile}`;
-            } else {
-              alert("Owner contact not available");
-            }
-          };
+  const actions = createEl("div",{class:"action-buttons"});
+  const wa = createEl("button",{class:"wa"}, '<i class="fab fa-whatsapp"></i>');
+  wa.onclick = () => openWhatsApp(house.mobile);
+  const call = createEl("button",{class:"call"}, '<i class="fa fa-phone"></i>');
+  call.onclick = () => callPhone(house.mobile);
 
-          // Combine everything
-          card.appendChild(slider);
-          card.appendChild(details);
-          card.appendChild(locationBtn);
-          card.appendChild(callBtn);
-          container.appendChild(card);
-        });
-      } catch (error) {
-        console.error("Fetch error:", error);
-        container.innerHTML = "<p style='text-align:center;width:100%'>Failed to load houses.</p>";
-      }
+  const viewBtn = createEl("button",{class:"btn ghost"}, "View Details");
+  viewBtn.onclick = () => openModal(house);
+
+  actions.appendChild(wa); actions.appendChild(call);
+
+  footer.appendChild(leftActions);
+  footer.appendChild(actions);
+
+  // append
+  card.appendChild(body);
+  card.appendChild(footer);
+
+  // clicking anywhere opens details (but not on buttons)
+  card.addEventListener("click", (ev)=>{
+    if(ev.target.closest("button") || ev.target.closest("a")) return;
+    openModal(house);
+  });
+
+  return card;
+}
+
+/* slider move */
+function slide(slider, dir){
+  const imgs = slider.querySelectorAll("img");
+  if(!imgs.length) return;
+  let idx = -1;
+  imgs.forEach((im,i)=>{ if(im.classList.contains("active")) idx = i; });
+  imgs[idx].classList.remove("active");
+  idx = (idx + dir + imgs.length) % imgs.length;
+  imgs[idx].classList.add("active");
+}
+
+/* Rating UI (visual-only) */
+function createRating(id){
+  const wrap = createEl("div",{class:"rating"});
+  for(let i=1;i<=5;i++){
+    const star = createEl("button", { style:"background:transparent;border:0;color:#ffd36b;font-size:16px;cursor:pointer" }, '<i class="fa fa-star"></i>');
+    star.dataset.value = i;
+    star.onclick = (e)=>{
+      e.stopPropagation();
+      const parent = star.parentNode;
+      const val = Number(star.dataset.value);
+      parent.querySelectorAll("i").forEach((ic, idx)=>{
+        ic.style.opacity = (idx < val) ? "1" : "0.35";
+      });
+    };
+    const ico = star.querySelector("i");
+    ico.style.opacity = "0.35";
+    wrap.appendChild(star);
+  }
+  return wrap;
+}
+
+/* Modal helpers */
+function openModal(house){
+  const modal = document.getElementById("modal");
+  const modalSlider = document.getElementById("modalSlider");
+  modalSlider.innerHTML = "";
+  (house.imageUrl || []).forEach((u,i)=>{
+    const img = createEl("img",{src:u, style:"width:100%;height:320px;object-fit:cover;display:"+ (i===0?"block":"none")});
+    modalSlider.appendChild(img);
+  });
+  if((house.imageUrl||[]).length>1){
+    const controls = createEl("div",{style:"position:absolute;top:calc(50% - 20px);left:8px;right:8px;display:flex;justify-content:space-between;pointer-events:none"});
+    const l = createEl("button",{},'<i class="fa fa-chevron-left"></i>');
+    const r = createEl("button",{},'<i class="fa fa-chevron-right"></i>');
+    l.onclick = (e)=>{ e.stopPropagation(); modalSlide(modalSlider, -1); };
+    r.onclick = (e)=>{ e.stopPropagation(); modalSlide(modalSlider, +1); };
+    controls.appendChild(l); controls.appendChild(r);
+    modalSlider.appendChild(controls);
+  }
+
+  document.getElementById("mTitle").textContent = (house.ownerName||"Owner") + " — " + (house.bedroom||"");
+  document.getElementById("mLocation").textContent = house.location || "Location not provided";
+  document.getElementById("mPrice").textContent = formatRent(house.rent) + (house.rent? "/month": "");
+  const pills = document.getElementById("mPills");
+  pills.innerHTML = "";
+  ["floor","kitchen","bedroom","hall","garden","waterSupply"].forEach(k=>{
+    if(house[k]) {
+      const p = createEl("span",{class:"pill"}, house[k]);
+      pills.appendChild(p);
     }
+  });
+  document.getElementById("mDesc").textContent = house.description || "";
+  document.getElementById("mOwner").textContent = house.ownerName || "Owner";
+  document.getElementById("mContact").textContent = house.mobile || "N/A";
 
-    loadHouses();
-  </script>
+  // call/wa/map buttons
+  document.getElementById("mCall").onclick = ()=> callPhone(house.mobile);
+  document.getElementById("mWa").onclick = ()=> openWhatsApp(house.mobile);
+  document.getElementById("mMap").onclick = ()=> {
+    const match = (house.location||"").match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/);
+    if(match){
+      const lat = match[1], lng = match[2];
+      window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+    } else if (house.mapLink) {
+      window.open(house.mapLink, "_blank");
+    } else {
+      alert("No geo coordinates available for this listing.");
+    }
+  };
+
+  // rating in modal (local only)
+  const mr = document.getElementById("mRating");
+  mr.innerHTML = "";
+  for(let i=1;i<=5;i++){
+    const s = createEl("i", { style:"font-size:20px;color:#ffd36b;margin-right:6px;cursor:pointer" }, '<i class="fa fa-star"></i>');
+    s.onclick = ()=> {
+      // update style
+      const children = mr.querySelectorAll("i");
+      children.forEach((c, idx)=> c.style.opacity = (idx < i) ? "1" : "0.35");
+    };
+    s.style.opacity = "0.35";
+    mr.appendChild(s);
+  }
+
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden","false");
+}
+function modalSlide(container, dir){
+  const imgs = Array.from(container.querySelectorAll("img"));
+  if(!imgs.length) return;
+  let idx = imgs.findIndex(i=> getComputedStyle(i).display !== "none");
+  imgs[idx].style.display = "none";
+  idx = (idx + dir + imgs.length) % imgs.length;
+  imgs[idx].style.display = "block";
+}
+document.getElementById("modalClose").onclick = ()=>{
+  const modal = document.getElementById("modal");
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden","true");
+};
+document.getElementById("modal").onclick = (e)=>{ if(e.target.id==="modal") { document.getElementById("modal").classList.remove("show"); } };
+
+/* open phone dialer */
+function callPhone(mobile){
+  if(!mobile){ alert("Owner contact not available"); return; }
+  window.location.href = `tel:${mobile}`;
+}
+/* open WhatsApp chat */
+function openWhatsApp(mobile){
+  if(!mobile){ alert("Owner contact not available"); return; }
+  // sanitize number: remove spaces, +, brackets
+  const sanitized = mobile.toString().replace(/[^0-9]/g,"");
+  // open wa.me link
+  window.open(`https://wa.me/${sanitized}`, "_blank");
+}
+
+/* =========================
+   Fetch + render pipeline
+   ========================= */
+let API_BASE = RENDER_URL; // default while detecting
+async function loadAndRender() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = `<div class="placeholder">Detecting API... Please wait</div>`;
+
+  API_BASE = await detectApiBase();
+  const url = API_BASE + HOUSES_PATH;
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    const houses = json.houses || (json.success && json.houses) || (json.houses? json.houses : (json.success? json.houses: []));
+    if(!houses || houses.length===0){ grid.innerHTML = `<div class="placeholder">No houses found.</div>`; return; }
+
+    allHouses = houses; // store globally for filtering
+    renderGrid(houses);
+  } catch(err){
+    console.error("Fetch failed:", err);
+    grid.innerHTML = `<div class="placeholder">Failed to load listings. Try again later.</div>`;
+  }
+}
+
+/* render grid with data */
+let allHouses = [];
+function renderGrid(houses){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  houses.forEach(h=>{
+    const card = makeCard(h);
+    grid.appendChild(card);
+  });
+}
+
+/* filters */
+document.getElementById("applyFilters").onclick = ()=>{
+  const loc = document.getElementById("searchLocation").value.trim().toLowerCase();
+  const bedroom = document.getElementById("filterBedroom").value;
+  const min = Number(document.getElementById("minRent").value || 0);
+  const max = Number(document.getElementById("maxRent").value || 0);
+
+  const filtered = allHouses.filter(h=>{
+    if(h.type !== "house") return false;
+    if(loc){
+      const hay = ((h.location||"") + " " + (h.ownerName||"") + " " + (h.description||"")).toLowerCase();
+      if(!hay.includes(loc)) return false;
+    }
+    if(bedroom && (h.bedroom || "") !== bedroom) return false;
+    if(min && Number(h.rent) < min) return false;
+    if(max && Number(h.rent) > max) return false;
+    return true;
+  });
+  renderGrid(filtered);
+};
+document.getElementById("clearFilters").onclick = ()=>{
+  document.getElementById("searchLocation").value = "";
+  document.getElementById("filterBedroom").value = "";
+  document.getElementById("minRent").value = "";
+  document.getElementById("maxRent").value = "";
+  renderGrid(allHouses);
+};
+
+/* init */
+loadAndRender();
+</script>
 </body>
 </html>

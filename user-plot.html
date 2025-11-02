@@ -149,7 +149,7 @@
       container.innerHTML = "<p style='text-align:center;width:100%'>Loading...</p>";
 
       try {
-        const response = await fetch("http://localhost:5000/api/plots");
+        const response = await fetch("http://renteasy1.onrender.com/api/plots");
         const data = await response.json();
 
         if (!data.success || data.plots.length === 0) {
