@@ -131,7 +131,7 @@ async function login() {
     }
 
     localStorage.setItem("user", JSON.stringify(data.user));
-    window.location.href = "shop.html";
+    window.location.href = "user-house.html";
   } catch (err) {
     console.error("Login Error:", err);
     alert("Server error, please try again");
@@ -174,3 +174,4 @@ async function signup() {
 
 </body>
 </html>
+
