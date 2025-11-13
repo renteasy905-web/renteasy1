@@ -1,5 +1,5 @@
 // ==============================
-// CHAT POINT – server.cjs (Render + Local)
+// CHAT POINT – server.cjs (Render + Local + APK + Play Store)
 // ==============================
 
 require("dotenv").config();
@@ -16,6 +16,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// FIX 415 ERROR: Accept binary uploads (APK, images, etc.)
+app.use(bodyParser.raw({ type: "application/octet-stream", limit: "50mb" }));
 
 // Log every request
 app.use((req, res, next) => {
@@ -203,59 +206,32 @@ app.get("/api/my-orders", async (req, res) => {
 });
 
 // ==============================
-// FORCE CORRECT MIME TYPES FOR ICONS & ASSETS
+// FORCE CORRECT MIME TYPES (ICONS, IMAGES, AUDIO)
 // ==============================
 
 app.use((req, res, next) => {
   const ext = path.extname(req.path).toLowerCase();
-  if (ext === '.png') {
-    res.setHeader('Content-Type', 'image/png');
-  } else if (ext === '.jpg' || ext === '.jpeg') {
-    res.setHeader('Content-Type', 'image/jpeg');
-  } else if (ext === '.webp') {
-    res.setHeader('Content-Type', 'image/webp');
-  } else if (ext === '.mp3') {
-    res.setHeader('Content-Type', 'audio/mpeg');
-  }
+  if (ext === ".png") res.setHeader("Content-Type", "image/png");
+  else if (ext === ".jpg" || ext === ".jpeg") res.setHeader("Content-Type", "image/jpeg");
+  else if (ext === ".webp") res.setHeader("Content-Type", "image/webp");
+  else if (ext === ".mp3") res.setHeader("Content-Type", "audio/mpeg");
   next();
 });
 
 // ==============================
-// SERVE STATIC FILES (HTML, IMAGES, ICONS, etc.)
+// SERVE STATIC FILES
 // ==============================
 
 app.use(express.static(path.join(__dirname)));
 
-// Explicit routes for HTML pages
-app.get("/privacy.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "privacy.html"));
+// Explicit HTML routes
+["privacy", "delivery", "orders", "items", "cart", "payment", "login"].forEach(page => {
+  app.get(`/${page}.html`, (req, res) => {
+    res.sendFile(path.join(__dirname, `${page}.html`));
+  });
 });
 
-app.get("/delivery.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "delivery.html"));
-});
-
-app.get("/orders.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "orders.html"));
-});
-
-app.get("/items.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "items.html"));
-});
-
-app.get("/cart.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "cart.html"));
-});
-
-app.get("/payment.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "payment.html"));
-});
-
-app.get("/login.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "login.html"));
-});
-
-// Catch-all: Serve index.html for SPA routing
+// Catch-all: Serve index.html
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
