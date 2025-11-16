@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <title>Chat Point | Food Shops</title>
 
   <!-- PWA ESSENTIALS -->
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
   <meta name="theme-color" content="#ff6b35">
 
   <!-- FONTS & ICONS -->
@@ -17,6 +21,9 @@
   <style>
     :root{--bg:#0f0f1a;--card:rgba(20,25,45,.7);--text:#e0e7ff;--accent:#ff6b35;--glow:rgba(255,107,53,.3);--radius:18px}
     *{margin:0;padding:0;box-sizing:border-box}
+    html, body {
+        touch-action: pan-x pan-y; /* Prevents pinch-zoom */
+    }
     body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
     body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 80%,rgba(255,107,53,.12),transparent 50%),radial-gradient(circle at 80% 20%,rgba(100,200,255,.08),transparent 50%);z-index:-1}
     header{padding:16px 20px;background:rgba(15,20,40,.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,107,53,.2);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
